@@ -1,5 +1,3 @@
-import 'package:animated_fab/widgets/bottomBarActionMenuRow.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
@@ -19,6 +17,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage>
     with SingleTickerProviderStateMixin {
   int _currentIndex = 0;
+  bool clickedCentreFAB = false;
   final tabs = [
     const Center(
       child: Text('Home'),
@@ -104,9 +103,10 @@ class _MyHomePageState extends State<MyHomePage>
   late AnimationController _controller;
   late Animation<double> _rotationAngle;
   late Animation<Color?> _centerIconBackgroundColor, _centerIconForegroundColor;
-  late Animation<double> _bottomBarActionMenuTopPosition;
+  // late Animation<double> _bottomBarActionMenuTopPosition;
+  late Animation<double> _centerIconPosition;
 
-  final _duration = const Duration(milliseconds: 250);
+  final _duration = const Duration(milliseconds: 150);
 
   _onCenterIconTap() {
     if (_controller.isCompleted) {
@@ -123,12 +123,14 @@ class _MyHomePageState extends State<MyHomePage>
     _controller = AnimationController(vsync: this, duration: _duration);
     _rotationAngle = Tween<double>(begin: 1, end: 4).animate(_controller);
     _centerIconBackgroundColor =
-        ColorTween(begin: const Color(0xFFFF3841), end: const Color(0xFFEAEAEA))
+        ColorTween(begin: const Color(0xFFFF3841), end: Colors.blue)
             .animate(_controller);
     _centerIconForegroundColor =
-        ColorTween(begin: Colors.white, end: Colors.black).animate(_controller);
-    _bottomBarActionMenuTopPosition =
-        Tween<double>(begin: 1000, end: kToolbarHeight).animate(_controller);
+        ColorTween(begin: Colors.white, end: Colors.white).animate(_controller);
+    // _bottomBarActionMenuTopPosition =
+    //     Tween<double>(begin: 1000, end: kToolbarHeight).animate(_controller);
+    _centerIconPosition =
+        Tween<double>(begin: 3.5, end: 60.0).animate(_controller);
   }
 
   @override
@@ -137,7 +139,7 @@ class _MyHomePageState extends State<MyHomePage>
       animation: _controller,
       builder: (context, child) {
         return Stack(
-          fit: StackFit.expand,
+          alignment: Alignment.bottomCenter,
           children: [
             Scaffold(
               appBar: AppBar(
@@ -153,31 +155,88 @@ class _MyHomePageState extends State<MyHomePage>
                     height: kToolbarHeight,
                     width: 70,
                   ),
-                  InkWell(
-                    onTap: _onCenterIconTap,
-                    child: Transform.rotate(
-                      angle: -math.pi / _rotationAngle.value,
-                      child: Container(
-                        width: 43,
-                        height: 43,
-                        child: Icon(
-                          Icons.add,
-                          color: _centerIconForegroundColor.value,
-                          size: 24.0,
-                        ),
-                        decoration: BoxDecoration(
-                          color: _centerIconBackgroundColor.value,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),
-            BottomBarActionMenuRow(
-              topPosition: _bottomBarActionMenuTopPosition.value,
-              onTap: _onCenterIconTap,
+            Align(
+              alignment: FractionalOffset.bottomCenter,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 150),
+                //if clickedCentreFAB == true, the first parameter is used. If it's false, the second.
+                height:
+                    clickedCentreFAB ? MediaQuery.of(context).size.height : 0.0,
+                width:
+                    clickedCentreFAB ? MediaQuery.of(context).size.height : 0.0,
+                decoration: BoxDecoration(
+                  borderRadius:
+                      BorderRadius.circular(clickedCentreFAB ? 0.0 : 300.0),
+                ),
+                child: Scaffold(
+                  backgroundColor: Colors.white.withOpacity(.8),
+                  body: Column(
+                    children: [
+                      Flexible(
+                        flex: 2,
+                        child: Container(),
+                      ),
+                      Expanded(
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 50),
+                          //if clickedCentreFAB == true, the first parameter is used. If it's false, the second.
+                          height: clickedCentreFAB
+                              ? MediaQuery.of(context).size.height * 0.4
+                              : 0.0,
+                          width: clickedCentreFAB
+                              ? MediaQuery.of(context).size.height
+                              : 0.0,
+                          decoration: BoxDecoration(
+                            color: Colors.blue,
+                            borderRadius: BorderRadius.circular(
+                              clickedCentreFAB ? 8.0 : 300.0,
+                            ),
+                          ),
+                          child: const Center(
+                            child: Text(
+                              'Details here',
+                            ),
+                          ),
+                        ),
+                      ),
+                      Flexible(
+                        child: Container(),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              bottom: _centerIconPosition.value,
+              child: GestureDetector(
+                onTap: () {
+                  _onCenterIconTap();
+                  setState(() {
+                    clickedCentreFAB =
+                        !clickedCentreFAB; //to update the animated container
+                  });
+                },
+                child: Transform.rotate(
+                  angle: -math.pi / _rotationAngle.value,
+                  child: Container(
+                    width: 48,
+                    height: 48,
+                    child: Icon(
+                      Icons.add,
+                      color: _centerIconForegroundColor.value,
+                      size: 24.0,
+                    ),
+                    decoration: BoxDecoration(
+                      color: _centerIconBackgroundColor.value,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ),
+              ),
             ),
           ],
         );
