@@ -1,4 +1,4 @@
-# animated_fab
+# customBottomNavBar
 
 A new Flutter project.
 
