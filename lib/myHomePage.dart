@@ -102,11 +102,13 @@ class _MyHomePageState extends State<MyHomePage>
 
   late AnimationController _controller;
   late Animation<double> _rotationAngle;
-  late Animation<Color?> _centerIconBackgroundColor, _centerIconForegroundColor;
-  // late Animation<double> _bottomBarActionMenuTopPosition;
+  late Animation<Color?> _centerIconBackgroundColor,
+      _centerIconForegroundColor,
+      _cardMenuBgColor;
+  late Animation<double> _cardMenuPosition;
   late Animation<double> _centerIconPosition;
 
-  final _duration = const Duration(milliseconds: 150);
+  final _duration = const Duration(milliseconds: 250);
 
   _onCenterIconTap() {
     if (_controller.isCompleted) {
@@ -123,14 +125,16 @@ class _MyHomePageState extends State<MyHomePage>
     _controller = AnimationController(vsync: this, duration: _duration);
     _rotationAngle = Tween<double>(begin: 1, end: 4).animate(_controller);
     _centerIconBackgroundColor =
-        ColorTween(begin: const Color(0xFFFF3841), end: Colors.blue)
+        ColorTween(begin: Colors.blue, end: const Color(0xFFFF3841))
             .animate(_controller);
     _centerIconForegroundColor =
         ColorTween(begin: Colors.white, end: Colors.white).animate(_controller);
-    // _bottomBarActionMenuTopPosition =
-    //     Tween<double>(begin: 1000, end: kToolbarHeight).animate(_controller);
+    _cardMenuBgColor = ColorTween(begin: Colors.transparent, end: Colors.blue)
+        .animate(_controller);
+    _cardMenuPosition =
+        Tween<double>(begin: kToolbarHeight, end: 200.0).animate(_controller);
     _centerIconPosition =
-        Tween<double>(begin: 3.5, end: 60.0).animate(_controller);
+        Tween<double>(begin: 3.5, end: 70.0).animate(_controller);
   }
 
   @override
@@ -161,7 +165,7 @@ class _MyHomePageState extends State<MyHomePage>
             Align(
               alignment: FractionalOffset.bottomCenter,
               child: AnimatedContainer(
-                duration: const Duration(milliseconds: 150),
+                duration: const Duration(milliseconds: 300),
                 //if clickedCentreFAB == true, the first parameter is used. If it's false, the second.
                 height:
                     clickedCentreFAB ? MediaQuery.of(context).size.height : 0.0,
@@ -173,24 +177,23 @@ class _MyHomePageState extends State<MyHomePage>
                 ),
                 child: Scaffold(
                   backgroundColor: Colors.white.withOpacity(.8),
-                  body: Column(
+                  body: Stack(
+                    alignment: Alignment.center,
                     children: [
-                      Flexible(
-                        flex: 2,
-                        child: Container(),
-                      ),
-                      Expanded(
+                      Positioned(
+                        bottom: _cardMenuPosition.value,
                         child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 50),
+                          duration: const Duration(milliseconds: 80),
                           //if clickedCentreFAB == true, the first parameter is used. If it's false, the second.
                           height: clickedCentreFAB
                               ? MediaQuery.of(context).size.height * 0.4
                               : 0.0,
                           width: clickedCentreFAB
-                              ? MediaQuery.of(context).size.height
+                              ? MediaQuery.of(context).size.width
                               : 0.0,
+                          //if clickedCentreFAB == true, the first parameter is used. If it's false, the second.
                           decoration: BoxDecoration(
-                            color: Colors.blue,
+                            color: _cardMenuBgColor.value,
                             borderRadius: BorderRadius.circular(
                               clickedCentreFAB ? 8.0 : 300.0,
                             ),
@@ -201,9 +204,6 @@ class _MyHomePageState extends State<MyHomePage>
                             ),
                           ),
                         ),
-                      ),
-                      Flexible(
-                        child: Container(),
                       ),
                     ],
                   ),
